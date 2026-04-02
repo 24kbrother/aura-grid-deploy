@@ -19,8 +19,10 @@
 
 ## 📸 视觉预览
 
-![Floorplan](https://cdn.jsdelivr.net/gh/24kbrother/aura-grid-assets/forum/main_dashboard.jpg)
-*(注：请在 PicGo 上传后替换此处的图床链接)*
+![Floorplan](https://cdn.jsdelivr.net/gh/24kbrother/pic-assets/2.jpg)
+![Floorplan](https://cdn.jsdelivr.net/gh/24kbrother/pic-assets/25.jpg)
+![Floorplan](https://cdn.jsdelivr.net/gh/24kbrother/pic-assets/1.jpg)
+
 
 ---
 
@@ -34,31 +36,22 @@
 ```bash
 mkdir aura-grid && cd aura-grid
 wget https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/docker-compose.yml
-wget https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/.env.example
-cp .env.example .env
+mkdir data
+mkdir floorplans
 ```
-
-### 3. 配置环境变量
-编辑 `.env` 文件，填入你的 HA 地址和 Token：
-```bash
-HA_URL=http://你的HA地址:8123
-HA_TOKEN=你的长效访问令牌
-ACCESS_PASSWORD=123456
-```
-
-### 4. 启动系统
+### 3. 启动系统
 ```bash
 docker-compose up -d
 ```
-启动后，访问 `http://你的服务器IP:8500` 即可开启你的智能家居新篇章。
+启动后，访问 `http://你的服务器IP:8125` 即可开启你的智能家居新篇章。
 
 ---
 
 ## 🛠️ 高级配置与自定义
 
 系统支持通过配置文件定义热点区域和微件布局。详细文档请参考：
-- [配置说明文档 (Wiki)](#)
-- [如何创建自定义微件](#)
+- 【待添加】[配置说明文档 (Wiki)](#)
+- 【待添加】[如何创建自定义微件](#)
 
 ---
 
@@ -68,8 +61,8 @@ docker-compose up -d
 
 我们非常看重你的反馈！如果在部署或使用过程中遇到任何问题，请随时联系：
 - **反馈 Bug / 提建议**：请在 GitHub [Issues](https://github.com/24kbrother/aura-grid-deploy/issues) 留言。
-- **技术支持与交流**：添加开发者微信 `[此处填写你的微信号]`，备注“Aura Grid 公测”。
-- **论坛讨论帖**：[翰思彼岸讨论帖](https://bbs.hassbian.com/...)
+- **技术支持与交流**：添加开发者微信 `china_24kbro`，备注“Aura Grid 公测”。
+- **论坛讨论帖**：[翰思彼岸讨论帖](https://bbs.hassbian.com/thread-32016-1-1.html)
 
 > [!TIP]
 > 感谢每一位在公测阶段提供建议的朋友。你的反馈将直接决定后续版本的开发方向！
