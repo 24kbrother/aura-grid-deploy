@@ -1,0 +1,50 @@
+# ══════════════════════════════════════════════════════════
+#  Aura Grid (Shadow Smart Home) - Production Deploy
+#  Official Repository: https://github.com/24kbrother/aura-grid-deploy
+# ══════════════════════════════════════════════════════════
+
+services:
+
+  # ─── Redis: Real-time state cache ─────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: aura-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - aura-internal
+
+  # ─── Aura Grid: Unified Dashboard & Gateway ───────────────
+  aura-grid:
+    image: ghcr.io/24kbrother/aura-grid:latest
+    container_name: aura-grid
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 8500
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: file:/app/prisma/data/prod.db
+      FLOORPLANS_DIR: /app/floorplans
+    volumes:
+      - db_data:/app/prisma/data
+      - ./floorplans:/app/floorplans
+    ports:
+      - "8500:8500"
+    networks:
+      - aura-internal
+    depends_on:
+      - redis
+
+# ─── Networks ─────────────────────────────────────────────
+networks:
+  aura-internal:
+    driver: bridge
+
+# ─── Volumes ──────────────────────────────────────────────
+volumes:
+  redis_data:
+    name: aura-redis-data
+  db_data:
+    name: aura-db-data
