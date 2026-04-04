@@ -30,7 +30,7 @@ services:
       - db_data:/app/prisma/data
       - ./floorplans:/app/floorplans
     ports:
-      - "8500:8500"
+      - "8125:8500"
     networks:
       - aura-internal
     depends_on:
