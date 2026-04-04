@@ -24,15 +24,17 @@ fi
 
 # 1. 停止并移除容器、网络及匿名卷
 echo -e "${GREEN}🛑 正在停止容器并移除网络...${NC}"
-if [ -f "docker-compose.yml" ]; then
+if [ -f "docker-compose.prod.yml" ]; then
+    $DOCKER_COMPOSE -f docker-compose.prod.yml down --volumes --remove-orphans
+elif [ -f "docker-compose.yml" ]; then
     $DOCKER_COMPOSE down --volumes --remove-orphans
 else
-    echo -e "${YELLOW}⚠️  未找到 docker-compose.yml，跳过容器停止阶段。${NC}"
+    echo -e "${YELLOW}⚠️  未找到 docker-compose 文件，跳过容器停止阶段。${NC}"
 fi
 
 # 2. 移除 Aura Grid 相关镜像
 echo -e "${GREEN}🧹 正在清理 Aura Grid 相关镜像...${NC}"
-IMAGES=$(docker images -q aura-grid)
+IMAGES=$(docker images --format "{{.Repository}} {{.ID}}" | grep "aura-grid" | awk '{print $2}' | sort -u)
 if [ -n "$IMAGES" ]; then
     echo "发现相关镜像，正在移除..."
     docker image rm -f $IMAGES 2>/dev/null
