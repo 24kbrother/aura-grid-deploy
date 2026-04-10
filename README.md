@@ -41,7 +41,7 @@ mkdir floorplans
 ```
 ### 3. 启动系统
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 启动后，访问 `http://你的服务器IP:8125` 即可开启你的智能家居新篇章。
 
