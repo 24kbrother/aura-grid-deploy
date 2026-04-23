@@ -29,7 +29,8 @@ services:
     volumes:
       - db_data:/app/prisma/data
       - ./floorplans:/app/floorplans
-      #- ./icons:/app/icons   #custom icons need use it
+      - ./icons:/app/icons   
+      - ./data:/app/data
     ports:
       - "8125:8500"
     networks:
