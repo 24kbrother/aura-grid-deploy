@@ -87,22 +87,38 @@ EOF
 
 # 4. 启动服务
 echo -e "${BLUE}🌐 正在拉取镜像并启动服务...${NC}"
-# --- 新增：清理可能残留的同名旧容器，防止命名冲突 ---
+
+# 强制清理重名容器
 docker rm -f aura-grid aura-redis &> /dev/null 
-docker compose pull
-docker compose up -d
-# 5. 输出结果
-# --- 修改：兼容群晖与标准 Linux 的 IP 获取逻辑 ---
-IP_ADDR=$(hostname -I 2>/dev/null | awk '{print $1}')
-if [ -z "$IP_ADDR" ]; then
-    # 如果 hostname -I 失败（如在群晖上），尝试使用 ip addr 命令获取
-    IP_ADDR=$(ip addr show | grep -v '127.0.0.1' | grep -Ee 'inet [0-9]' | awk '{print $2}' | cut -d'/' -f1 | head -n 1)
+
+# 执行拉取
+if ! docker compose pull; then
+    echo -e "${RED}❌ 镜像拉取失败，请检查网络或代理设置。${NC}"
+    exit 1
 fi
-# 如果仍然获取失败，显示占位符
-[ -z "$IP_ADDR" ] && IP_ADDR="SERVER_IP"
+
+# 执行启动，并捕获错误
+if ! docker compose up -d; then
+    echo -e "\n${RED}==================================================${NC}"
+    echo -e "❌ 部署失败！"
+    echo -e "--------------------------------------------------"
+    echo -e "原因: 容器启动失败，可能是端口 8125 已被占用。"
+    echo -e "建议: 执行 'netstat -tunlp | grep 8125' 检查端口占用。"
+    echo -e "${RED}==================================================${NC}"
+    exit 1
+fi
+
+# 5. 二次自检：确认容器是否真的在 Running 状态
+if [ "$(docker inspect -f '{{.State.Running}}' aura-grid 2>/dev/null)" != "true" ]; then
+    echo -e "${RED}❌ 警告：容器虽然已创建，但未能持续运行。请检查 Docker 日志。${NC}"
+    exit 1
+fi
+
+# 只有通过了上面的层层校验，才会执行到这里
+# 5. 输出结果
+IP_ADDR=$(hostname -I 2>/dev/null | awk '{print $1}')
+# ... (IP 获取逻辑同上)
+
 echo -e "\n${GREEN}==================================================${NC}"
 echo -e "🎉 Aura Grid Lite 部署成功！"
-echo -e "--------------------------------------------------"
-echo -e "🔹 访问入口: http://${IP_ADDR}:8125"
-echo -e "🔹 您的设备 ID: $(cat "$HWID_FILE")"
-echo -e "${GREEN}==================================================${NC}"
+# ... (输出详情)
