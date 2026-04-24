@@ -32,18 +32,12 @@
 - 已经安装 Docker & Docker Compose。
 - 一个可用的 Home Assistant 实例，并已生成 **Long-lived Access Token**。
 
-### 2. 下载部署文件
+### 2. 一载部署
 ```bash
-mkdir aura-grid && cd aura-grid
-wget https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/docker-compose.yml
-mkdir data
-mkdir floorplans
+wget https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/SETUP_LITE.sh ｜ sudo bash SETUP_LITE.sh
+
 ```
-### 3. 启动系统
-```bash
-docker compose up -d
-```
-启动后，访问 `http://你的服务器IP:8125` 即可开启你的智能家居新篇章。
+访问 `http://你的服务器IP:8125` 即可开启你的智能家居新篇章。
 
 ---
 
