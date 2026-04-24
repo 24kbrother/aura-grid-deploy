@@ -1,4 +1,4 @@
-ZH](README_ZH.md)
+**English** | [ZH](README_ZH.md)
 
 # Aura Grid - Next-Gen Smart Home Dashboard
 
