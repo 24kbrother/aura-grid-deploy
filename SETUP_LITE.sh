@@ -87,11 +87,19 @@ EOF
 
 # 4. 启动服务
 echo -e "${BLUE}🌐 正在拉取镜像并启动服务...${NC}"
+# --- 新增：清理可能残留的同名旧容器，防止命名冲突 ---
+docker rm -f aura-grid aura-redis &> /dev/null 
 docker compose pull
 docker compose up -d
-
 # 5. 输出结果
-IP_ADDR=$(hostname -I | awk '{print $1}')
+# --- 修改：兼容群晖与标准 Linux 的 IP 获取逻辑 ---
+IP_ADDR=$(hostname -I 2>/dev/null | awk '{print $1}')
+if [ -z "$IP_ADDR" ]; then
+    # 如果 hostname -I 失败（如在群晖上），尝试使用 ip addr 命令获取
+    IP_ADDR=$(ip addr show | grep -v '127.0.0.1' | grep -Ee 'inet [0-9]' | awk '{print $2}' | cut -d'/' -f1 | head -n 1)
+fi
+# 如果仍然获取失败，显示占位符
+[ -z "$IP_ADDR" ] && IP_ADDR="SERVER_IP"
 echo -e "\n${GREEN}==================================================${NC}"
 echo -e "🎉 Aura Grid Lite 部署成功！"
 echo -e "--------------------------------------------------"
