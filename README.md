@@ -34,7 +34,7 @@
 
 ### 2. 一载部署
 ```bash
-curl -sSL https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/SETUP_LITE.sh ｜ sudo bash SETUP_LITE.sh
+curl -sSL https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/SETUP_LITE.sh | sudo bash SETUP_LITE.sh
 
 ```
 访问 `http://你的服务器IP:8125` 即可开启你的智能家居新篇章。
