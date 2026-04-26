@@ -59,7 +59,7 @@ services:
       - aura-internal
 
   aura-grid:
-    image: ghcr.nju.edu.cn/24kbrother/aura-grid:latest
+    image: ghcr.io/24kbrother/aura-grid:latest
     container_name: aura-grid
     restart: unless-stopped
     environment:
