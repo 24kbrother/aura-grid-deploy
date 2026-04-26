@@ -15,7 +15,7 @@
 Experience the power of Aura Grid on your local server with a single command:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/SETUP_LITE.sh | bash
+curl -sSL https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/SETUP_LITE.sh | bash ./SETUP_LITE.sh
 ```
 
 ---
