@@ -39,6 +39,12 @@ else
     echo -e "${GREEN}✨ 已生成全新设备指纹: ${NEW_HWID}${NC}"
 fi
 
+CHECK_FILE="$INSTALL_DIR/data/check.id"
+echo "1.5.6-LITE" > "$CHECK_FILE"
+echo -e "${GREEN}✅ 部署环境自检标记已写入。${NC}"
+
+
+
 # 3. 生成 LITE 版 docker-compose.yml
 echo -e "${BLUE}📦 正在生成 Docker 编排文件...${NC}"
 cat <<EOF > "$INSTALL_DIR/docker-compose.yml"
