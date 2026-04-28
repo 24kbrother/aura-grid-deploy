@@ -10,9 +10,30 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
 
+echo -e "${BLUE}==================================================================${NC}"
+echo -e "${GREEN} 欢迎部署 AURA Grid —— 您的下一代智慧家居视觉中控系统${NC}"
+echo -e "${BLUE}==================================================================${NC}"
+echo -e " 💡 当前正在为您安全部署：\033[1;32mLite 免费版\033[0m"
+echo -e " ✨ 基础控制体验完全免费！若您希望探索「全量高级微件、多楼层无缝切换、云端联动」等极致功能："
+echo -e "    可在系统初始化完成后，通过设置面板内的升级入口接入 \033[1;35mPRO 终身会员\033[0m。"
+echo -e " 🎁 \033[1;33m[早鸟特惠预警]\033[0m：当前限时锁定「一次付费、终身买断」，后续版本将全面恢复订阅制。"
+echo -e ""
+echo -e " 💬 官方技术支持通道："
+echo -e "    WeChat: china_24kbro"
+echo -e "    Email:  24k.brother@gmail.com"
+echo -e "${BLUE}==================================================================${NC}\n"
+
+# 1. 镜像拉取加速入口
+IMAGE_HOST="ghcr.io"
+read -p "是否需要开启国内镜像拉取加速（南京大学源）？[y/N]: " USE_ACCEL </dev/tty
+if [[ "$USE_ACCEL" =~ ^[Yy]$ ]]; then
+    IMAGE_HOST="ghcr.nju.edu.cn"
+    echo -e "${GREEN}[INFO] 已成功为您切换镜像加速拉取源。${NC}\n"
+fi
+
 echo -e "${BLUE}🚀 正在启动 Aura Grid Lite 部署流程...${NC}"
 
-# 1. 基础环境检测
+# 1.5 基础环境检测
 if ! command -v docker &> /dev/null; then
     echo -e "${RED}❌ 未检测到 Docker，请先安装 Docker。${NC}"
     exit 1
@@ -59,7 +80,7 @@ services:
       - aura-internal
 
   aura-grid:
-    image: ghcr.io/24kbrother/aura-grid:latest
+    image: ${IMAGE_HOST}/24kbrother/aura-grid:latest
     container_name: aura-grid
     restart: unless-stopped
     environment:
