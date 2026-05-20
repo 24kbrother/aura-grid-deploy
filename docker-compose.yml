@@ -20,7 +20,6 @@ services:
     image: ghcr.io/24kbrother/aura-grid:latest
     container_name: aura-grid
     restart: unless-stopped
-    env_file: .env
     environment:
       NODE_ENV: production
       PORT: 8500

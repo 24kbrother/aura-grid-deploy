@@ -66,12 +66,17 @@ docker image rm -f $(docker images | grep aura-grid | awk '{print $3}')
 ```
 
 ### 2. 一键卸载与彻底清理
-我们提供了一个交互式的卸载脚本，支持自动停止容器并清理相关的 Docker 镜像：
+我们提供了一个交互式的卸载脚本，支持自动停止容器并清理相关的 Docker 镜像。
+
+**直接远程运行（推荐）：**
 ```bash
-# 赋予执行权限
-chmod +x UNINSTALL.sh
-# 运行卸载脚本
-./UNINSTALL.sh
+wget -O UNINSTALL.sh https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/UNINSTALL.sh && bash UNINSTALL.sh
+```
+
+**或者本地运行：**
+```bash
+# 赋予执行权限并运行
+chmod +x UNINSTALL.sh && ./UNINSTALL.sh
 ```
 
 > [!CAUTION]

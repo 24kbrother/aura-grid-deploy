@@ -32,7 +32,7 @@ fi
 
 # 2. 移除 Aura Grid 相关镜像
 echo -e "${GREEN}🧹 正在清理 Aura Grid 相关镜像...${NC}"
-IMAGES=$(docker images -q aura-grid)
+IMAGES=$(docker images --format "{{.Repository}} {{.ID}}" | grep "aura-grid" | awk '{print $2}' | sort -u)
 if [ -n "$IMAGES" ]; then
     echo "发现相关镜像，正在移除..."
     docker image rm -f $IMAGES 2>/dev/null
