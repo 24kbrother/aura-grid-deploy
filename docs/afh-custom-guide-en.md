@@ -50,7 +50,7 @@ For complex service operations (such as setting climate temperatures, adjusting 
 
 On the dashboard canvas, when page lock is disabled, you can visually adjust the absolute positioning coordinates of the floating widgets using coordinate grids and drag-and-drop handles. The layout editor interface is shown below:
 
-![AFH Layout Editor UI](assets/afh-editor.png)
+![AFH Layout Editor UI](assets/afh-editor.gif)
 > **Figure 3.1**: Aura Floating Hub visual coordinate grid overlay and interactive drag interface.
 
 ```html
@@ -140,7 +140,7 @@ Based on the following functional requirements, output the complete component co
 
 Below is the live rendering effect of our custom floating widgets integrated onto the 3D floor plan layout:
 
-![Floating Widget Rendered Effect](assets/afh-render.png)
+![Floating Widget Rendered Effect](assets/afh-render.gif)
 > **Figure 5.1**: Floating Weather Bubble and Floating Light Monitor Panel templates running live over the 3D dashboard canvas.
 
 ### Template A: Floating Weather Bubble
