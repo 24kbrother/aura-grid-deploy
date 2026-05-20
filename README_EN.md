@@ -1,6 +1,6 @@
-**English** | [&#20013;&#25991;](README_ZH.md)
+**English** | [中文](README_ZH.md)
 
-# Aura Grid - Next-Gen Smart Home Dashboard
+# 🌌 Aura Grid - Next-Gen Smart Home Dashboard
 
 [![Version](https://img.shields.io/badge/version-v1.5.7--LITE-blue.svg)](https://github.com/24kbrother/aura-grid-deploy)
 [![License](https://img.shields.io/badge/license-Commercial-red.svg)](https://vlanhub.com/buy)
@@ -10,7 +10,7 @@
 
 ---
 
-## One-Click Quick Start (LITE)
+## 🚀 One-Click Quick Start (LITE)
 
 Experience the power of Aura Grid on your local server with a single command:
 
@@ -20,7 +20,7 @@ curl -sSL https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/SET
 
 ---
 
-## Lite vs. Pro: Choose Your Experience
+## 💎 Lite vs. Pro: Choose Your Experience
 
 | Feature | LITE Edition | PRO Edition |
 | :--- | :---: | :---: |
@@ -34,26 +34,25 @@ curl -sSL https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/SET
 
 ---
 
-## Aura Guard Security System
+## 🛡️ Aura Guard Security System
 Introducing **Aura Guard v1.1.0**, the invisible shield for your smart home terminal.
 - **3-Strikes Rule**: Automated IP banning after 3 failed login attempts within 1 hour.
-- - **Silent Beacon**: Real-time heartbeat monitoring and authorization auditing.
-  - - **Node-RED Synergy**: Instant mobile alerts via Home Assistant when security events trigger.
-   
-    - ---
+- **Global Heartbeat**: Real-time health monitoring and license auditing.
+- **Node-RED Integration**: Instant mobile notifications via Home Assistant when security events occur.
 
-    ## Upgrade to PRO
-    Unleash the full potential of your smart home terminal. Get your 16-character high-entropy license key today.
+---
 
-    [Get Aura Grid PRO - Official Portal](https://vlanhub.com/buy)
+## 🛒 Upgrade to Pro
+Unlock the full potential of your smart home terminal. Get your 16-character high-entropy license key today.
 
-    ---
+👉 **[Get Aura Grid Pro - Official Portal](https://vlanhub.com/buy)**
 
-    ## Support & Community
-    - **Tutorials**: [Bilibili Channel](https://space.bilibili.com/29908699)
-    - - **Feedback**: [GitHub Issues](https://github.com/24kbrother/aura-grid-deploy/issues)
-      - - **Contact**: [24k.bro](mailto:24k.brother@gmail.com)
-       
-        - ---
-        * (c) 2026 Aura Guard Security. All rights reserved. *
-        * 
+---
+
+## 📞 Support & Community
+- **Tutorials**: [Bilibili Channel](https://space.bilibili.com/29908699)
+- **Issues**: [GitHub Issues](https://github.com/24kbrother/aura-grid-deploy/issues)
+- **Author**: [24k.bro](mailto:24k.brother@gmail.com)
+
+---
+*© 2026 Aura Guard Security. All rights reserved.*
