@@ -48,6 +48,11 @@ For complex service operations (such as setting climate temperatures, adjusting 
 
 ## 3. Code Format Specification (SFC Standard)
 
+Input your SFC source code directly in the Sidebar Custom HTML Swiper configuration box under the System Settings. The configuration panel is shown below:
+
+![Configuration Editor UI](assets/sidebar-editor.png)
+> **Figure 3.1**: Sidebar SFC dynamic code editor input field.
+
 Custom widgets must follow the standard Mini-SFC Single File Component layout:
 
 ```html
@@ -140,6 +145,11 @@ Based on the following functional requirements, output the complete component co
 ---
 
 ## 6. Reference Templates
+
+Below is the live rendering effect of our pre-built custom widgets loaded in the sidebar:
+
+![Rendered Template Effect](assets/sidebar-render.png)
+> **Figure 6.1**: Lounge Control Panel and Battery Alert Radar components running live in the sidebar container.
 
 ### Template A: Lounge Control Panel
 *   **Description**: A control panel listing the status of lights and fans in the lounge. Features active state lighting indicators and real-time sensor metrics.
