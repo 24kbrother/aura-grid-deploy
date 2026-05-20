@@ -50,7 +50,7 @@ Aura Grid Pro 内置了一套轻量级的动态单文件组件（SFC）解析与
 
 在系统控制面板的“侧边栏混合滑动微件”配置框中直接输入您的 SFC 源码。配置界面如下图所示：
 
-![配置编辑界面](assets/sidebar-editor.png)
+![配置编辑界面](assets/sidebar-editor.gif)
 > **图 3.1**：侧边栏 SFC 动态代码编辑器输入框界面。
 
 微件的代码应遵循标准的 Mini-SFC 单文件组件规范，结构如下：

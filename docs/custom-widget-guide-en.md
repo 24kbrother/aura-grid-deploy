@@ -50,7 +50,7 @@ For complex service operations (such as setting climate temperatures, adjusting 
 
 Input your SFC source code directly in the Sidebar Custom HTML Swiper configuration box under the System Settings. The configuration panel is shown below:
 
-![Configuration Editor UI](assets/sidebar-editor.png)
+![Configuration Editor UI](assets/sidebar-editor.gif)
 > **Figure 3.1**: Sidebar SFC dynamic code editor input field.
 
 Custom widgets must follow the standard Mini-SFC Single File Component layout:
