@@ -19,7 +19,7 @@ echo -e "    可在系统初始化完成后，通过设置面板内的升级入�
 echo -e " ---------------------------------------------------------------------------"
 echo -e ""
 echo -e " ***************************************************************************************"
-echo -e " * 🎁 \033[1;33m[早鸟特惠预警]\033[0m：当前限时锁定「一次付费、终身买断」，后续版本将全面恢复订阅制。   *"
+echo -e " * 🎁 \033[1;33m[早鸟特惠预警]\033[0m：当前限时锁定「一次付费、终身买断」，后续版本将全面恢复订阅制。*"
 echo -e " ***************************************************************************************"
 echo -e ""
 echo -e " 💬 官方技术支持通道："
@@ -36,6 +36,14 @@ if [ -n "$PROXY_URL" ]; then
     export HTTP_PROXY=$PROXY_URL
     export HTTPS_PROXY=$PROXY_URL
     echo -e "${GREEN}[INFO] 临时网络代理配置成功。${NC}\n"
+fi
+
+# 1.7 阿里云国内加速选项
+USE_ALIYUN="n"
+echo -e "${BLUE}[加速更新选项]${NC}"
+read -p "是否启用阿里云国内极速镜像通道进行安装？(国内网络建议输入 y 启用，直接回车使用官方通道): " CHOOSE_ALIYUN </dev/tty
+if [ "$CHOOSE_ALIYUN" = "y" ]; then
+    USE_ALIYUN="y"
 fi
 
 echo -e "${BLUE}🚀 正在启动 Aura Grid Lite 部署流程...${NC}"
@@ -68,7 +76,7 @@ else
 fi
 
 CHECK_FILE="$INSTALL_DIR/data/check.id"
-echo "1.5.6-LITE" > "$CHECK_FILE"
+echo "1.5.12-LITE" > "$CHECK_FILE"
 echo -e "${GREEN}✅ 部署环境自检标记已写入。${NC}"
 
 
@@ -87,7 +95,7 @@ services:
       - aura-internal
 
   aura-grid:
-    image: ${IMAGE_HOST}/24kbrother/aura-grid:latest
+    image: \${IMAGE_HOST}/24kbrother/aura-grid:latest
     container_name: aura-grid
     restart: unless-stopped
     environment:
@@ -126,9 +134,24 @@ echo -e "${BLUE}🌐 正在拉取镜像并启动服务...${NC}"
 docker rm -f aura-grid aura-redis &> /dev/null 
 
 # 执行拉取
-if ! docker compose pull; then
-    echo -e "${RED}❌ 镜像拉取失败，请检查网络或代理设置。${NC}"
-    exit 1
+if [ "$USE_ALIYUN" = "y" ]; then
+    echo -e "${BLUE}[*] 正在通过阿里云极速通道拉取最新镜像...${NC}"
+    if docker pull crpi-z60uur6y0xgl3fgs.cn-chengdu.personal.cr.aliyuncs.com/aura-grid/aura-grid:latest; then
+        echo -e "${BLUE}[*] 正在本地对齐官方容器标识...${NC}"
+        docker tag crpi-z60uur6y0xgl3fgs.cn-chengdu.personal.cr.aliyuncs.com/aura-grid/aura-grid:latest ghcr.io/24kbrother/aura-grid:latest
+        echo -e "${BLUE}[*] 正在安全清理旧的缓存镜像...${NC}"
+        docker image prune -f >/dev/null 2>&1 || true
+    else
+        echo -e "${RED}[WARNING] 阿里云通道拉取失败，正在自动为您降级为官方 GitHub 链路...${NC}"
+        USE_ALIYUN="n"
+    fi
+fi
+
+if [ "$USE_ALIYUN" = "n" ]; then
+    if ! docker compose pull; then
+        echo -e "${RED}❌ 镜像拉取失败，请检查网络或代理设置。${NC}"
+        exit 1
+    fi
 fi
 
 # 执行启动，并捕获错误
