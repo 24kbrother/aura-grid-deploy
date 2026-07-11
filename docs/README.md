@@ -6,7 +6,18 @@ Welcome to the Aura Grid Developer Hub. This center provides full technical spec
 
 ---
 
-## 1. Sidebar Custom Swiper / 侧边栏混合滑动微件
+## 1. AI Agent / AI 智能管家
+
+Configure the built-in AI butler with natural language smart home control via Telegram and WeCom messaging channels.
+
+配置内置的 AI 智能管家，通过 Telegram / 企业微信消息渠道实现自然语言智能家居控制。
+
+*   [**智能管家配置指南 (Agent Setup)**](agent-guide.md)
+*   [**Telegram 渠道配置 (Telegram Setup)**](telegram-setup.md)
+
+---
+
+## 2. Sidebar Custom Swiper / 侧边栏混合滑动微件
 
 Program custom components rendered within isolated sandboxed containers inside the sidebar widgets, communicating directly with your Home Assistant entities.
 
@@ -17,7 +28,7 @@ Program custom components rendered within isolated sandboxed containers inside t
 
 ---
 
-## 2. Aura Floating Hub (AFH) / 悬浮图层系统微件
+## 3. Aura Floating Hub (AFH) / 悬浮图层系统微件
 
 Overlay advanced floating cards (e.g. status bubbles, lighting monitors, or quick-action rings) above the main dashboard canvas with active drag-and-drop support.
 
@@ -28,7 +39,7 @@ Overlay advanced floating cards (e.g. status bubbles, lighting monitors, or quic
 
 ---
 
-## 3. Visual Specifications / 视觉规范
+## 4. Visual Specifications / 视觉规范
 
 To maintain visual consistency with the high-tech, futuristic dark UI:
 1. Always utilize the transparent, frosted glass aesthetics with `backdrop-filter: blur(12px)`.
