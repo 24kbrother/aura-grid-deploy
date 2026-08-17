@@ -76,7 +76,7 @@ else
 fi
 
 CHECK_FILE="$INSTALL_DIR/data/check.id"
-echo "1.5.12-LITE" > "$CHECK_FILE"
+echo "1.6.0-LITE" > "$CHECK_FILE"
 echo -e "${GREEN}✅ 部署环境自检标记已写入。${NC}"
 
 
