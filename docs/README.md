@@ -39,14 +39,14 @@ Overlay advanced floating cards (e.g. status bubbles, lighting monitors, or quic
 
 ---
 
-## 4. Maintenance & Recovery / 运维与账号恢复
+## 4. Password Reset / 密码重置
 
 Recover access or reset administrator credentials without losing dashboard configurations.
 
-在忘记管理员密码或需要重置凭据时自主恢复访问，且 100% 保持大屏与户型图配置完好。
+在忘记管理员密码或需要重设凭据时自主恢复访问，且 100% 保持大屏与户型图配置完好。
 
-*   [**密码重置与账号找回指南 (Chinese Guide)**](password-reset-guide.md)
-*   [**Password Reset & Recovery Manual (English)**](password-reset-guide-en.md)
+*   [**中文操作指南 (Chinese Guide)**](password-reset-guide.md)
+*   [**English Manual**](password-reset-guide-en.md)
 
 ---
 
