@@ -39,7 +39,18 @@ Overlay advanced floating cards (e.g. status bubbles, lighting monitors, or quic
 
 ---
 
-## 4. Visual Specifications / 视觉规范
+## 4. Maintenance & Recovery / 运维与账号恢复
+
+Recover access or reset administrator credentials without losing dashboard configurations.
+
+在忘记管理员密码或需要重置凭据时自主恢复访问，且 100% 保持大屏与户型图配置完好。
+
+*   [**密码重置与账号找回指南 (Chinese Guide)**](password-reset-guide.md)
+*   [**Password Reset & Recovery Manual (English)**](password-reset-guide-en.md)
+
+---
+
+## 5. Visual Specifications / 视觉规范
 
 To maintain visual consistency with the high-tech, futuristic dark UI:
 1. Always utilize the transparent, frosted glass aesthetics with `backdrop-filter: blur(12px)`.
@@ -50,3 +61,4 @@ To maintain visual consistency with the high-tech, futuristic dark UI:
 1. 始终使用 `backdrop-filter: blur(12px)` 保持毛玻璃半透明美感。
 2. 使用统一的极细边框：`border: 1px solid rgba(255, 255, 255, 0.08)`。
 3. 状态激活时推荐使用高亮纯色（青色、宝蓝、霓虹琥珀、翡翠绿）作为呼吸灯或指示器。
+

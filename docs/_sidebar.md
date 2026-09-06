@@ -11,3 +11,8 @@
 * **Aura Floating Hub / 悬浮图层**
   * [中文开发指南](afh-custom-guide.md)
   * [English Manual](afh-custom-guide-en.md)
+
+* **运维与账号恢复 / Maintenance**
+  * [密码重置指南 (中文)](password-reset-guide.md)
+  * [Password Reset (EN)](password-reset-guide-en.md)
+

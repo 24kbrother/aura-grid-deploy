@@ -79,6 +79,7 @@ curl -sSL http://auragrid.cn/LITE.sh | bash
 
 - **视频教程**: [Bilibili 官方空间](https://space.bilibili.com/29908699)
 - **文档中心**: [在线使用指南](https://24kbrother.github.io/aura-grid-deploy/)
+- **密码找回**: [密码重置与账号恢复指南](https://24kbrother.github.io/aura-grid-deploy/#/password-reset-guide)
 - **问题反馈**: [GitHub Issues](https://github.com/24kbrother/aura-grid-deploy/issues)
 - **微信支持**: `china_24kbro`
 - **官方邮箱**: [24k.brother@gmail.com](mailto:24k.brother@gmail.com)

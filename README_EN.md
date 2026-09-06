@@ -79,6 +79,7 @@ Unlock the ultimate smart home central control experience: dedicated portrait mo
 
 - **Video Tutorials**: [Bilibili Channel](https://space.bilibili.com/29908699)
 - **Documentation**: [Online User Guide](https://24kbrother.github.io/aura-grid-deploy/)
+- **Password Reset**: [Password Reset & Recovery Guide](https://24kbrother.github.io/aura-grid-deploy/#/password-reset-guide-en)
 - **Issues & Feedback**: [GitHub Issues](https://github.com/24kbrother/aura-grid-deploy/issues)
 - **WeChat Support**: `china_24kbro`
 - **Contact**: [24k.brother@gmail.com](mailto:24k.brother@gmail.com)
