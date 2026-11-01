@@ -10,24 +10,26 @@
 
 ---
 
-## 🚀 One-Click Quick Start (LITE Edition)
+## 🚀 Quick Start & Maintenance
 
-Deploy Aura Grid on your local server (Synology NAS, PVE, Unraid, Linux Server, Raspberry Pi, etc.) with a single command:
+Deploy or update Aura Grid with intelligent radar self-navigation:
 
-### ⚡ Accelerated Domestic Channel (Aliyun ACR)
+### 1️⃣ Fresh Installation & Smart Setup
+Run the smart installation radar (with automatic NAS storage pool detection, mirror selector, and Host/Bridge networking):
 ```bash
-curl -sSL http://auragrid.cn/PULL_LITE_FROM_ALIYUN.sh | bash
-```
-
-### 🌐 Official Global Channel
-```bash
+# Recommended Domestic / Global Auto-Mirror
 curl -sSL http://auragrid.cn/LITE.sh | bash
+
+# Or via GitHub Raw
+curl -sSL https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/SETUP_LITE.sh | bash
 ```
 
-> Fallback GitHub Endpoint:
-> ```bash
-> curl -sSL https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/SETUP_LITE.sh | bash
-> ```
+### 2️⃣ Fast In-Place Update (Zero-Prompt / Radar Auto-Pathfinding)
+For existing installations, run the zero-interaction update script from **any directory** (automatically detects physical path, pulls via accelerated Aliyun ACR, restarts in-place, and frees disk space):
+```bash
+curl -sSL http://auragrid.cn/UPDATE_LITE.sh | bash
+```
+> Or directly inside your deployment folder: `bash ./UPDATE_LITE.sh`
 
 ---
 

@@ -1,89 +1,372 @@
 #!/bin/bash
 
 # =================================================================
-# 🟢 Aura Grid - Lite 免费开源版安装脚本
-# 用途: 首次安装 Aura Grid Lite 时的环境初始化与一键启动
+# Aura Grid - Lite 开源版部署与智能维护中枢
+# 适用平台: Linux / macOS / Docker / 群晖 / 威联通 / 极空间 / 飞牛等 NAS
+# 官方仓库: https://github.com/24kbrother/aura-grid-deploy
+# 官方网站: https://auragrid.cn
+# 兼容标准: 100% POSIX sh / dash / bash 跨平台自适应
+# 智能特性:
+#   1. 双轨雷达寻径: 无论在任意路径执行，均可秒级定位历史安装物理目录
+#   2. 自感知无感升级: 发现已有实例时，默认回车直接原地/穿透完成更新
+#   3. 双网络模式: 默认 Host 直通 (激活 mDNS 局域网毫秒级探活) 与 Bridge 隔离
+#   4. NAS 存储架构雷达: 智能探测群晖/飞牛/威联通/绿联大容量池，防系统盘爆满
 # =================================================================
+
+# 0. 自动 Shell 提升引擎 (当用户使用 sh 显式执行时，自动无缝升级至 bash)
+if [ -z "$BASH_VERSION" ]; then
+    if command -v bash >/dev/null 2>&1 && [ -f "$0" ]; then
+        exec bash "$0" "$@"
+    fi
+fi
+
+set -e
+
+# 颜色与输出函数 (严密保证 dash/sh 终端下转义序列合规)
+print_msg() {
+    printf "%b\n" "$1"
+}
 
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
 RED='\033[0;31m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
-echo -e "${BLUE}==================================================================${NC}"
-echo -e "${GREEN} 欢迎部署 AURA Grid —— 您的下一代智慧家居视觉中控系统${NC}"
-echo -e "${BLUE}==================================================================${NC}"
-echo -e " 💡 当前正在为您安全部署：\033[1;32mLite 免费版\033[0m"
-echo -e " ✨ 基础控制体验完全免费！若您希望探索「全量高级微件、多楼层无缝切换、云端联动」等极致功能："
-echo -e "    可在系统初始化完成后，通过设置面板内的升级入口接入 \033[1;35mPRO 终身会员\033[0m。"
-echo -e " ---------------------------------------------------------------------------"
-echo -e ""
-echo -e " ***************************************************************************************"
-echo -e " * 🎁 \033[1;33m[早鸟特惠预警]\033[0m：当前限时锁定「一次付费、终身买断」，后续版本将全面恢复订阅制。*"
-echo -e " ***************************************************************************************"
-echo -e ""
-echo -e " 💬 官方技术支持通道："
-echo -e "    WeChat: china_24kbro"
-echo -e "    Email:  24k.brother@gmail.com"
-echo -e "${BLUE}==================================================================${NC}\n"
+# 镜像地址定义
+ALIYUN_IMAGE="crpi-z60uur6y0xgl3fgs.cn-chengdu.personal.cr.aliyuncs.com/aura-grid/aura-grid:latest"
+GHCR_IMAGE="ghcr.io/24kbrother/aura-grid:latest"
 
-# 1. 临时网络代理加速（可选，解决国内 ghcr.io 拉取慢）
-IMAGE_HOST="ghcr.io"
-read -p "是否需要配置临时 HTTP 代理加速拉取？(直接回车跳过，若需要请输入如 http://127.0.0.1:7890 ): " PROXY_URL </dev/tty
-if [ -n "$PROXY_URL" ]; then
-    export http_proxy=$PROXY_URL
-    export https_proxy=$PROXY_URL
-    export HTTP_PROXY=$PROXY_URL
-    export HTTPS_PROXY=$PROXY_URL
-    echo -e "${GREEN}[INFO] 临时网络代理配置成功。${NC}\n"
+# 终端输入兼容函数 (自适应交互终端、管道模式与非交互自动化环境)
+ask_user() {
+    local prompt="$1"
+    local default_val="$2"
+    local val=""
+    if [ -t 0 ]; then
+        read -p "$prompt" val || true
+    elif (exec </dev/tty) 2>/dev/null; then
+        read -p "$prompt" val </dev/tty 2>/dev/null || true
+    else
+        read val 2>/dev/null || true
+    fi
+    echo "${val:-$default_val}"
+}
+
+# 智能探测主流 NAS 存储架构与推荐安全安装目录 (防系统盘爆满)
+detect_recommended_dir() {
+    local app_name="$1"
+    
+    # 1. 群晖 Synology DSM (/volume1/docker 等大容量存储池)
+    for v in /volume1 /volume2 /volume3 /volume4; do
+        if [ -d "$v/docker" ]; then
+            echo "$v/docker/$app_name"; return
+        elif [ -d "$v" ]; then
+            echo "$v/$app_name"; return
+        fi
+    done
+
+    # 2. 飞牛 fnOS (基于 Debian，存储池在 /vol1, /vol2 等)
+    for v in /vol1 /vol2 /vol3 /vol4; do
+        if [ -d "$v/docker" ]; then
+            echo "$v/docker/$app_name"; return
+        elif [ -d "$v" ]; then
+            echo "$v/$app_name"; return
+        fi
+    done
+
+    # 3. 威联通 QNAP (/share/Container 等)
+    for s in /share/Container /share/CACHEDEV1_DATA/Container /share/CACHEDEV2_DATA/Container; do
+        if [ -d "$s" ]; then
+            echo "$s/$app_name"; return
+        fi
+    done
+
+    # 4. 绿联 UGOS / UGOS Pro (/mnt/media_rw, /mnt/storage 等)
+    for m in /mnt/storage* /mnt/media_rw*; do
+        if [ -d "$m/docker" ]; then
+            echo "$m/docker/$app_name"; return
+        elif [ -d "$m" ]; then
+            echo "$m/$app_name"; return
+        fi
+    done
+
+    # 5. Linux 通用最佳实践目录 (/opt)
+    if [ -d "/opt" ]; then
+        echo "/opt/$app_name"; return
+    fi
+
+    # 6. 回退兜底：当前用户执行目录下的子目录
+    echo "$(pwd)/$app_name"
+}
+
+print_msg "${BLUE}==================================================================${NC}"
+print_msg "${GREEN}欢迎使用 AURA Grid Lite —— 智慧空间视觉中控系统${NC}"
+print_msg "${BLUE}==================================================================${NC}"
+print_msg " [INFO] 基础控制体验完全免费。如需全量高级微件、多楼层流转与云端联动:"
+print_msg "        可在系统初始化后，通过设置面板内的升级通道接入 \033[1;35mPRO 终身会员\033[0m。"
+print_msg " ------------------------------------------------------------------"
+print_msg " 官方技术支持通道:"
+print_msg " WeChat: china_24kbro | Email: 24k.brother@gmail.com"
+print_msg "${BLUE}==================================================================${NC}\n"
+
+# 1. 权限与 Docker 环境自适应探测 (100% POSIX 标准，严格兼容 dash/sh)
+DOCKER_CMD="docker"
+CURRENT_UID=$(id -u 2>/dev/null || echo 0)
+
+if [ "$CURRENT_UID" -ne 0 ]; then
+    if docker ps >/dev/null 2>&1; then
+        DOCKER_CMD="docker"
+    elif command -v sudo >/dev/null 2>&1; then
+        DOCKER_CMD="sudo docker"
+        if ! sudo -n true 2>/dev/null; then
+            print_msg "${YELLOW}[!] 当前普通用户执行 Docker 需要管理员授权，请输入 sudo 密码:${NC}"
+            sudo -v || {
+                print_msg "${RED}[ERROR] sudo 认证失败，请确认密码。${NC}"
+                exit 1
+            }
+        fi
+    else
+        print_msg "${RED}==================================================================${NC}"
+        print_msg "${RED}[ERROR] 权限不足：当前用户 [$(whoami)] 没有操作 Docker 的权限。${NC}"
+        print_msg "${RED}==================================================================${NC}"
+        print_msg " 排查与建议:"
+        print_msg "  1. 请切换至 root 账户后重试: sudo -i"
+        print_msg "  2. 或将当前用户加入 docker 组: sudo usermod -aG docker $(whoami)"
+        print_msg "${RED}==================================================================${NC}\n"
+        exit 1
+    fi
 fi
 
-# 1.7 阿里云国内加速选项
-USE_ALIYUN="n"
-echo -e "${BLUE}[加速更新选项]${NC}"
-read -p "是否启用阿里云国内极速镜像通道进行安装？(国内网络建议输入 y 启用，直接回车使用官方通道): " CHOOSE_ALIYUN </dev/tty
-if [ "$CHOOSE_ALIYUN" = "y" ]; then
-    USE_ALIYUN="y"
-fi
-
-echo -e "${BLUE}🚀 正在启动 Aura Grid Lite 部署流程...${NC}"
-
-# 1.5 基础环境检测
-if ! command -v docker &> /dev/null; then
-    echo -e "${RED}❌ 未检测到 Docker，请先安装 Docker。${NC}"
+if ! command -v docker >/dev/null 2>&1 && ! command -v sudo >/dev/null 2>&1; then
+    print_msg "${RED}[ERROR] 未检测到 Docker 环境，请先安装 Docker。${NC}"
     exit 1
 fi
 
-INSTALL_DIR=$(pwd)
+COMPOSE_CMD="$DOCKER_CMD compose"
+if ! $DOCKER_CMD compose version >/dev/null 2>&1; then
+    if command -v docker-compose >/dev/null 2>&1; then
+        COMPOSE_CMD="docker-compose"
+    else
+        print_msg "${RED}[ERROR] 未检测到 docker compose 核心组件，请先安装 Docker Compose。${NC}"
+        exit 1
+    fi
+fi
 
-# 2. 初始化物理目录与设备指纹 (HWID)
-echo -e "${BLUE}📂 正在初始化配置目录与生成设备指纹...${NC}"
-mkdir -p "$INSTALL_DIR/data"
-mkdir -p "$INSTALL_DIR/floorplans"
-mkdir -p "$INSTALL_DIR/icons"
+# 2. 双轨雷达环境探测：嗅探宿主机现有实例物理路径与有效性
+EXISTING_TARGET_DIR=""
+EXISTING_CONTAINER=$($DOCKER_CMD ps -a -q -f name=^aura-grid$ 2>/dev/null || true)
+
+if [ -n "$EXISTING_CONTAINER" ]; then
+    # 轨 A: 检查 Compose 工作目录 Label
+    LABEL_DIR=$($DOCKER_CMD inspect -f '{{index .Config.Labels "com.docker.compose.project.working_dir"}}' "$EXISTING_CONTAINER" 2>/dev/null || true)
+    if [ -n "$LABEL_DIR" ] && [ -d "$LABEL_DIR" ]; then
+        EXISTING_TARGET_DIR="$LABEL_DIR"
+    fi
+
+    # 轨 B: 挂载点宿主机源路径反推兜底
+    if [ -z "$EXISTING_TARGET_DIR" ]; then
+        MOUNT_SRC=$($DOCKER_CMD inspect --format='{{range .Mounts}}{{if eq .Destination "/app/data"}}{{.Source}}{{end}}{{end}}' "$EXISTING_CONTAINER" 2>/dev/null || true)
+        if [ -n "$MOUNT_SRC" ]; then
+            CANDIDATE_DIR=$(dirname "$MOUNT_SRC")
+            if [ -d "$CANDIDATE_DIR" ]; then
+                EXISTING_TARGET_DIR="$CANDIDATE_DIR"
+            fi
+        fi
+    fi
+fi
+
+# 轨 C: 当前目录自查兜底
+if [ -z "$EXISTING_TARGET_DIR" ] && [ -f "./docker-compose.yml" ]; then
+    if grep -q 'aura-grid:' ./docker-compose.yml 2>/dev/null; then
+        EXISTING_TARGET_DIR=$(pwd)
+    fi
+fi
+
+# 双重校验：检查物理编排文件 docker-compose.yml 是否真实存在
+IS_VALID_EXISTING_INSTANCE=false
+if [ -n "$EXISTING_TARGET_DIR" ] && [ -d "$EXISTING_TARGET_DIR" ] && [ -f "$EXISTING_TARGET_DIR/docker-compose.yml" ]; then
+    IS_VALID_EXISTING_INSTANCE=true
+elif [ -n "$EXISTING_CONTAINER" ]; then
+    # 存在孤儿残留容器，但物理目录或 docker-compose.yml 已丢失
+    print_msg "${YELLOW}[!] 雷达检测到宿主机存在残留的旧容器 aura-grid，但物理编排文件已丢失或被移除。${NC}"
+    print_msg "${BLUE}[*] 正在自动清理该残留容器，以确保全新部署环境整洁...${NC}"
+    $DOCKER_CMD rm -f aura-grid aura-redis >/dev/null 2>&1 || true
+    EXISTING_TARGET_DIR=""
+fi
+
+# 3. 智能分流与任意目录自感知无缝升级
+if [ "$IS_VALID_EXISTING_INSTANCE" = "true" ]; then
+    CONTAINER_STATUS=$($DOCKER_CMD inspect -f '{{.State.Status}}' "$EXISTING_CONTAINER" 2>/dev/null || echo "running")
+    print_msg "${GREEN}[+] 雷达探测到宿主机已部署 Aura Grid Lite 实例！${NC}"
+    print_msg "  • 物理安装目录: ${BLUE}${EXISTING_TARGET_DIR}${NC}"
+    print_msg "  • 容器当前状态: ${CYAN}${CONTAINER_STATUS}${NC}"
+    print_msg " ------------------------------------------------------------------"
+    print_msg " 请选择执行操作:"
+    print_msg "  ${CYAN}[1] 一键极速平滑更新至最新版本${NC} (推荐: 自动穿透至原目录，保留原配置与数据) [默认]"
+    print_msg "  ${CYAN}[2] 全新部署一个新实例 / 重新规划安装路径${NC} (可重新选择安全存储目录)"
+    print_msg "  ${CYAN}[3] 退出操作${NC}"
+    print_msg " ------------------------------------------------------------------"
+    ACTION_CHOICE=$(ask_user "请输入选项 [1/2/3] (直接回车默认: 1): " "1")
+
+    if [ "$ACTION_CHOICE" = "1" ]; then
+        print_msg "\n${BLUE}[*] 正在自动穿透至安装目录: ${EXISTING_TARGET_DIR}${NC}"
+        cd "$EXISTING_TARGET_DIR"
+
+        # 保护性备份指纹
+        [ -f "./data/device.id" ] && cp ./data/device.id ./data/device.id.bak 2>/dev/null || true
+
+        # 极速拉取并打标
+        UPDATE_SUCCESS=false
+        print_msg "${BLUE}[*] 默认启用阿里云国内极速通道拉取最新镜像...${NC}"
+        if $DOCKER_CMD pull "$ALIYUN_IMAGE"; then
+            print_msg "${BLUE}[*] 正在本地对齐官方容器标识...${NC}"
+            $DOCKER_CMD tag "$ALIYUN_IMAGE" "$GHCR_IMAGE"
+            $DOCKER_CMD rmi "$ALIYUN_IMAGE" >/dev/null 2>&1 || true
+            UPDATE_SUCCESS=true
+        else
+            print_msg "${YELLOW}[WARNING] 阿里云通道拉取遇到网络波动，正在尝试官方 GitHub 链路...${NC}"
+            if $COMPOSE_CMD pull; then
+                UPDATE_SUCCESS=true
+            fi
+        fi
+
+        if [ "$UPDATE_SUCCESS" != "true" ]; then
+            print_msg "${RED}[ERROR] 镜像拉取失败，请检查网络连接后重试。${NC}"
+            exit 1
+        fi
+
+        print_msg "${BLUE}[*] 正在平滑更新重启容器 (保留您的历史配置、数据与网络模式)...${NC}"
+        if $COMPOSE_CMD up -d; then
+            print_msg "\n${GREEN}[SUCCESS] Aura Grid Lite 已成功更新并运行最新版本！${NC}"
+            
+            # 安全释放旧镜像
+            print_msg "${BLUE}[*] 正在自动清理被替换的旧版本镜像...${NC}"
+            $DOCKER_CMD image prune -f >/dev/null 2>&1 || true
+            print_msg "${GREEN}[SUCCESS] 磁盘空间已自动优化清理完毕！${NC}"
+
+            IP_ADDR=$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7}')
+            if [ -z "$IP_ADDR" ]; then
+                IP_ADDR=$(hostname -I 2>/dev/null | awk '{print $1}')
+            fi
+            [ -z "$IP_ADDR" ] && IP_ADDR="127.0.0.1"
+
+            print_msg "\n${GREEN}==================================================${NC}"
+            print_msg " 访问入口: ${BLUE}http://${IP_ADDR}:8125${NC}"
+            print_msg " 工作目录: ${BLUE}${EXISTING_TARGET_DIR}${NC}"
+            print_msg "${GREEN}==================================================${NC}\n"
+            exit 0
+        else
+            print_msg "${RED}[ERROR] 容器重启失败，请检查 ${EXISTING_TARGET_DIR}/docker-compose.yml。${NC}"
+            exit 1
+        fi
+    elif [ "$ACTION_CHOICE" = "3" ]; then
+        print_msg "${GREEN}[INFO] 已安全退出。${NC}\n"
+        exit 0
+    else
+        print_msg "${YELLOW}[*] 用户选择重新规划全新部署，继续配置向导...${NC}\n"
+    fi
+fi
+
+# 4. 全新安装流程：Step 1 镜像下载源选择
+print_msg "${YELLOW}[1/2] 请选择镜像下载通道 (Download Mirror):${NC}"
+print_msg "  ${CYAN}[1] 阿里云国内极速通道${NC} (推荐: 国内服务器、极空间/群晖/飞牛等 NAS 环境) [默认]"
+print_msg "  ${CYAN}[2] GitHub 官方通道${NC} (推荐: 海外 VPS、已配置代理环境)"
+print_msg " ------------------------------------------------------------------"
+MIRROR_CHOICE=$(ask_user "请输入选项 [1/2] (直接回车默认: 1): " "1")
+
+if [ "$MIRROR_CHOICE" != "2" ]; then
+    MIRROR_CHOICE="1"
+    print_msg "${GREEN}[+] 已选择: 阿里云国内极速通道${NC}\n"
+else
+    print_msg "${GREEN}[+] 已选择: GitHub 官方通道${NC}\n"
+fi
+
+# 5. 全新安装流程：Step 2 网络运行模式选择
+print_msg "${YELLOW}[2/2] 请选择网络运行模式 (Network Mode):${NC}"
+print_msg "  ${CYAN}[1] Host 宿主直通模式${NC} (推荐: 开启 mDNS 毫秒级探活，手机 App 免配置秒连) [默认]"
+print_msg "  ${CYAN}[2] Bridge 桥接隔离模式${NC} (传统端口映射 8125，隔离度高；手机端需手动输入 IP)"
+print_msg " ------------------------------------------------------------------"
+NET_CHOICE=$(ask_user "请输入选项 [1/2] (直接回车默认: 1): " "1")
+
+if [ "$NET_CHOICE" != "2" ]; then
+    NET_CHOICE="1"
+    print_msg "${GREEN}[+] 已选择: Host 宿主直通模式 (mDNS 局域网探活已激活)${NC}\n"
+else
+    print_msg "${GREEN}[+] 已选择: Bridge 桥接隔离模式${NC}\n"
+fi
+
+# 6. 智能 NAS 存储路径推荐与决策 (防系统小盘爆满)
+REC_DIR=$(detect_recommended_dir "aura-lite")
+CURRENT_DEFAULT="$(pwd)/aura-lite"
+
+# 若当前目录已经是 aura-lite，保持当前；若当前在 root 根目录，强烈引导至推荐或子目录
+if [ "$(basename "$(pwd)")" = "aura-lite" ]; then
+    CURRENT_DEFAULT="$(pwd)"
+fi
+
+print_msg "${BLUE}[*] 正在扫描宿主机存储架构与大容量磁盘...${NC}"
+print_msg "${GREEN}[+] 推荐数据存储池: ${CYAN}${REC_DIR}${NC} (大容量安全分区，防系统盘爆满)"
+print_msg " ------------------------------------------------------------------"
+print_msg " 请确认服务部署物理路径:"
+print_msg "  ${CYAN}[1] 使用系统推荐路径: ${REC_DIR}${NC} [默认推荐]"
+print_msg "  ${CYAN}[2] 部署在当前目录下: ${CURRENT_DEFAULT}${NC}"
+print_msg "  ${CYAN}[3] 自定义输入其他绝对路径${NC}"
+print_msg " ------------------------------------------------------------------"
+PATH_CHOICE=$(ask_user "请输入选项 [1/2/3] (直接回车默认: 1): " "1")
+
+if [ "$PATH_CHOICE" = "2" ]; then
+    INSTALL_DIR="$CURRENT_DEFAULT"
+elif [ "$PATH_CHOICE" = "3" ]; then
+    CUSTOM_INPUT=$(ask_user "请输入您指定的绝对路径 (例如 /data/aura-lite): " "")
+    if [ -n "$CUSTOM_INPUT" ]; then
+        INSTALL_DIR="$CUSTOM_INPUT"
+    else
+        INSTALL_DIR="$REC_DIR"
+    fi
+else
+    INSTALL_DIR="$REC_DIR"
+fi
+
+mkdir -p "$INSTALL_DIR" 2>/dev/null || sudo mkdir -p "$INSTALL_DIR"
+cd "$INSTALL_DIR"
+print_msg "${GREEN}[+] 服务物理安装路径已锁定: ${BLUE}${INSTALL_DIR}${NC}\n"
+
+# 7. 初始化物理目录与持久化指纹
+print_msg "${BLUE}[*] 正在初始化配置目录与持久化数据...${NC}"
+mkdir -p "$INSTALL_DIR/data" "$INSTALL_DIR/floorplans" "$INSTALL_DIR/icons"
 chmod -R 777 "$INSTALL_DIR/data" "$INSTALL_DIR/floorplans" "$INSTALL_DIR/icons"
 
 HWID_FILE="$INSTALL_DIR/data/device.id"
+if [ -d "$HWID_FILE" ]; then
+    rm -rf "$HWID_FILE"
+fi
 
 if [ -f "$HWID_FILE" ]; then
     EXISTING_HWID=$(cat "$HWID_FILE")
-    echo -e "${GREEN}✅ 检测到已有设备指纹: ${EXISTING_HWID}${NC}"
+    print_msg "${GREEN}[+] 检测到已有设备指纹: ${EXISTING_HWID}${NC}"
 else
-    # 生成通用 UUID
-    NEW_HWID=$(cat /proc/sys/kernel/random/uuid)
+    if [ -f /proc/sys/kernel/random/uuid ]; then
+        NEW_HWID=$(cat /proc/sys/kernel/random/uuid)
+    elif command -v uuidgen >/dev/null 2>&1; then
+        NEW_HWID=$(uuidgen)
+    else
+        NEW_HWID="aura-lite-$(od -x /dev/urandom 2>/dev/null | head -n 1 | awk '{print $2$3$4$5}' || date +%s)"
+    fi
     echo "$NEW_HWID" > "$HWID_FILE"
-    echo -e "${GREEN}✨ 已生成全新设备指纹: ${NEW_HWID}${NC}"
+    print_msg "${GREEN}[+] 已生成全新设备指纹: ${NEW_HWID}${NC}"
 fi
 
-CHECK_FILE="$INSTALL_DIR/data/check.id"
-echo "1.6.0-LITE" > "$CHECK_FILE"
-echo -e "${GREEN}✅ 部署环境自检标记已写入。${NC}"
+echo "1.6.0-LITE" > "$INSTALL_DIR/data/check.id"
 
+# 8. 根据网络模式动态生成 docker-compose.yml
+print_msg "${BLUE}[*] 正在生成 Docker Compose 编排文件...${NC}"
 
+if [ "$NET_CHOICE" = "1" ]; then
+    # Host 宿主直通模式编排
+    cat <<EOF > "$INSTALL_DIR/docker-compose.yml"
+name: aura-grid-lite
 
-# 3. 生成 LITE 版 docker-compose.yml
-echo -e "${BLUE}📦 正在生成 Docker 编排文件...${NC}"
-cat <<EOF > "$INSTALL_DIR/docker-compose.yml"
 services:
   redis:
     image: redis:7-alpine
@@ -91,17 +374,21 @@ services:
     restart: unless-stopped
     volumes:
       - redis_data:/data
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - "127.0.0.1:6379:6379"
     networks:
       - aura-internal
 
   aura-grid:
-    image: ghcr.io/24kbrother/aura-grid:latest
+    image: ${GHCR_IMAGE}
     container_name: aura-grid
     restart: unless-stopped
+    network_mode: host
     environment:
       NODE_ENV: production
-      PORT: 8500
-      REDIS_URL: redis://redis:6379
+      PORT: 8125
+      REDIS_URL: redis://127.0.0.1:6379
       DATABASE_URL: file:/app/prisma/data/prod.db
       FLOORPLANS_DIR: /app/floorplans
     volumes:
@@ -109,10 +396,7 @@ services:
       - ./floorplans:/app/floorplans
       - ./icons:/app/icons
       - ./data:/app/data
-    ports:
-      - "8125:8500"
-    networks:
-      - aura-internal
+      - ./data/device.id:/etc/machine-id:ro
     depends_on:
       - redis
 
@@ -126,56 +410,103 @@ volumes:
   db_data:
     name: aura-db-data
 EOF
+else
+    # Bridge 桥接隔离模式编排
+    cat <<EOF > "$INSTALL_DIR/docker-compose.yml"
+name: aura-grid-lite
 
-# 4. 启动服务
-echo -e "${BLUE}🌐 正在拉取镜像并启动服务...${NC}"
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: aura-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    command: redis-server --save 60 1 --loglevel warning
+    networks:
+      - aura-network
 
-# 强制清理重名容器
-docker rm -f aura-grid aura-redis &> /dev/null 
+  aura-grid:
+    image: ${GHCR_IMAGE}
+    container_name: aura-grid
+    restart: unless-stopped
+    ports:
+      - "8125:8125"
+    environment:
+      NODE_ENV: production
+      PORT: 8125
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: file:/app/prisma/data/prod.db
+      FLOORPLANS_DIR: /app/floorplans
+    volumes:
+      - db_data:/app/prisma/data
+      - ./floorplans:/app/floorplans
+      - ./icons:/app/icons
+      - ./data:/app/data
+      - ./data/device.id:/etc/machine-id:ro
+    depends_on:
+      - redis
+    networks:
+      - aura-network
 
-# 执行拉取
-if [ "$USE_ALIYUN" = "y" ]; then
-    echo -e "${BLUE}[*] 正在通过阿里云极速通道拉取最新镜像...${NC}"
-    if docker pull crpi-z60uur6y0xgl3fgs.cn-chengdu.personal.cr.aliyuncs.com/aura-grid/aura-grid:latest; then
-        echo -e "${BLUE}[*] 正在本地对齐官方容器标识...${NC}"
-        docker tag crpi-z60uur6y0xgl3fgs.cn-chengdu.personal.cr.aliyuncs.com/aura-grid/aura-grid:latest ghcr.io/24kbrother/aura-grid:latest
-        echo -e "${BLUE}[*] 正在安全清理旧的缓存镜像...${NC}"
-        docker image prune -f >/dev/null 2>&1 || true
+networks:
+  aura-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    name: aura-redis-data
+  db_data:
+    name: aura-db-data
+EOF
+fi
+
+# 9. 智能拉取镜像并部署运行
+print_msg "\n${BLUE}[*] 正在拉取镜像并部署运行...${NC}"
+
+if [ "$MIRROR_CHOICE" = "1" ]; then
+    print_msg "${BLUE}[*] 正在通过阿里云国内极速通道拉取最新镜像...${NC}"
+    if $DOCKER_CMD pull "$ALIYUN_IMAGE"; then
+        print_msg "${BLUE}[*] 正在本地对齐官方标准容器标识...${NC}"
+        $DOCKER_CMD tag "$ALIYUN_IMAGE" "$GHCR_IMAGE"
+        $DOCKER_CMD rmi "$ALIYUN_IMAGE" >/dev/null 2>&1 || true
     else
-        echo -e "${RED}[WARNING] 阿里云通道拉取失败，正在自动为您降级为官方 GitHub 链路...${NC}"
-        USE_ALIYUN="n"
+        print_msg "${YELLOW}[WARNING] 阿里云通道拉取遇到网络波动，正在切换至官方 GitHub 链路...${NC}"
+        $COMPOSE_CMD pull
     fi
+else
+    print_msg "${BLUE}[*] 正在通过 GitHub 官方通道拉取最新镜像...${NC}"
+    $COMPOSE_CMD pull
 fi
 
-if [ "$USE_ALIYUN" = "n" ]; then
-    if ! docker compose pull; then
-        echo -e "${RED}❌ 镜像拉取失败，请检查网络或代理设置。${NC}"
-        exit 1
-    fi
+print_msg "${BLUE}[*] 正在启动 Aura Grid Lite 容器...${NC}"
+$COMPOSE_CMD up -d
+
+# 10. 在安装目录释放专属更新脚本并赋权
+if [ -f "$0" ] && [ -f "$(dirname "$0")/UPDATE_LITE.sh" ]; then
+    cp "$(dirname "$0")/UPDATE_LITE.sh" "$INSTALL_DIR/UPDATE_LITE.sh" 2>/dev/null || true
+    chmod +x "$INSTALL_DIR/UPDATE_LITE.sh" 2>/dev/null || true
 fi
 
-# 执行启动，并捕获错误
-if ! docker compose up -d; then
-    echo -e "\n${RED}==================================================${NC}"
-    echo -e "❌ 部署失败！"
-    echo -e "--------------------------------------------------"
-    echo -e "原因: 容器启动失败，可能是端口 8125 已被占用。"
-    echo -e "建议: 执行 'netstat -tunlp | grep 8125' 检查端口占用。"
-    echo -e "${RED}==================================================${NC}"
-    exit 1
+# 11. 部署成功结果看板
+IP_ADDR=$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7}')
+if [ -z "$IP_ADDR" ]; then
+    IP_ADDR=$(hostname -I 2>/dev/null | awk '{print $1}')
 fi
+[ -z "$IP_ADDR" ] && IP_ADDR="127.0.0.1"
 
-# 5. 二次自检：确认容器是否真的在 Running 状态
-if [ "$(docker inspect -f '{{.State.Running}}' aura-grid 2>/dev/null)" != "true" ]; then
-    echo -e "${RED}❌ 警告：容器虽然已创建，但未能持续运行。请检查 Docker 日志。${NC}"
-    exit 1
+print_msg "\n${GREEN}==================================================${NC}"
+print_msg "${GREEN}[SUCCESS] Aura Grid Lite 部署完成！${NC}"
+print_msg "--------------------------------------------------"
+print_msg "  访问入口: ${BLUE}http://${IP_ADDR}:8125${NC}"
+print_msg "  安装目录: ${BLUE}${INSTALL_DIR}${NC}"
+if [ "$NET_CHOICE" = "1" ]; then
+    print_msg "  网络模式: ${GREEN}Host 直通模式 (mDNS 探活已激活，手机 App 局域网秒连)${NC}"
+else
+    print_msg "  网络模式: ${YELLOW}Bridge 桥接模式 (端口: 8125)${NC}"
 fi
-
-# 只有通过了上面的层层校验，才会执行到这里
-# 5. 输出结果
-IP_ADDR=$(hostname -I 2>/dev/null | awk '{print $1}')
-# ... (IP 获取逻辑同上)
-
-echo -e "\n${GREEN}==================================================${NC}"
-echo -e "🎉 Aura Grid Lite 部署成功！"
-# ... (输出详情)
+print_msg "--------------------------------------------------"
+print_msg " [升级维护指引] 国内网络环境强烈推荐使用极速更新脚本:"
+print_msg "  • 本地极速更新: ${CYAN}cd ${INSTALL_DIR} && bash ./UPDATE_LITE.sh${NC}"
+print_msg "  • 远程一行更新: ${CYAN}curl -sSL http://auragrid.cn/UPDATE_LITE.sh | bash${NC}"
+print_msg "${GREEN}==================================================${NC}\n"

@@ -10,24 +10,26 @@
 
 ---
 
-## 🚀 一键快速启动 (LITE 开源免费版)
+## 🚀 一键部署与极速维护
 
-只需一行命令，即可在您的本地服务器（群晖 NAS、PVE、Unraid、Linux 服务器、树莓派等）上开启 Aura Grid 的极致体验：
+支持智能双轨雷达自寻径，可在宿主机任意目录下直接执行：
 
-### ⚡ 国内加速安装 / 更新（推荐 · 阿里云极速通道）
+### 1️⃣ 全新首装与部署向导
+运行全能智能安装中枢（支持群晖/飞牛/威联通 NAS 存储池智能探测防爆盘、阿里云/GitHub 双镜像选择与 Host 直通模式）：
 ```bash
-curl -sSL http://auragrid.cn/PULL_LITE_FROM_ALIYUN.sh | bash
-```
-
-### 🌐 官方通道（全量一键安装）
-```bash
+# 推荐国内 / 海外自适应通道
 curl -sSL http://auragrid.cn/LITE.sh | bash
+
+# 或通过 GitHub 官方镜像源
+curl -sSL https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/SETUP_LITE.sh | bash
 ```
 
-> 备用 GitHub 节点：
-> ```bash
-> curl -sSL https://raw.githubusercontent.com/24kbrother/aura-grid-deploy/main/SETUP_LITE.sh | bash
-> ```
+### 2️⃣ 极速无感热更新 (0 交互 · 任意路径自动穿透)
+针对已有系统日常更新，无需按键交互，在**任意路径**下均可直接执行（雷达自动锁定物理安装目录、阿里云极速拉取、无损重启并清理旧镜像空间）：
+```bash
+curl -sSL http://auragrid.cn/UPDATE_LITE.sh | bash
+```
+> 亦可在物理安装目录下直接运行: `bash ./UPDATE_LITE.sh`
 
 ---
 
