@@ -1,0 +1,3 @@
+configuration: {}
+network:
+  8500/tcp: "Aura Grid Lite 局域网访问与 App 直连端口 (默认 8125，冲突可自由修改)"

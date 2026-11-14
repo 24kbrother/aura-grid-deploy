@@ -1,0 +1,39 @@
+name: "Aura Grid Lite"
+description: "Aura Grid 开源全屋智能数字孪生控制中枢 (支持 HAOS / 冬瓜OS)"
+slug: "aura_grid_lite"
+version: "1.6.9-lite"
+image: "ghcr.io/24kbrother/aura-grid"
+init: false
+arch:
+  - aarch64
+  - amd64
+startup: services
+boot: auto
+
+# 网络与 Ingress 架构 (桥接隔离，同时支持 Ingress 与 局域网宿主端口直连)
+host_network: false
+ingress: true
+ingress_port: 8500
+panel_icon: "mdi:cube-outline"
+panel_title: "Aura Lite"
+
+# 局域网访问与 App 直连端口 (默认 8125，用户可在 HA「配置」面板自由自定义)
+ports:
+  8500/tcp: 8125
+ports_description:
+  8500/tcp: "Aura Grid Lite 局域网访问与 App 直连端口 (默认 8125，冲突可自由修改)"
+
+# Supervisor Watchdog 健康检查 (绑定原生 /health)
+watchdog: "http://[HOST]:[PORT:8500]/health"
+
+# 最小特权安全基线
+homeassistant_api: false
+hassio_api: false
+
+# 环境变量显式注入
+environment:
+  HA_APP_MODE: "true"
+  NODE_ENV: "production"
+  PORT: "8500"
+  REDIS_URL: "redis://127.0.0.1:6379"
+  DATABASE_URL: "file:/data/prod.db"
